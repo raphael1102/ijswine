@@ -249,7 +249,7 @@ function setupCheckout() {
       `Please find my proof of payment attached. Kindly confirm and process my delivery.\n\nThank you!`
     );
 
-    window.open(`https://wa.me/2348012345678?text=${msg}`, '_blank');
+    window.open(`https://wa.me/2349166828985?text=${msg}`, '_blank');
   });
 }
 
