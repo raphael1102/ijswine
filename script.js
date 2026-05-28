@@ -1,9 +1,8 @@
 /* ═══════════════════════════════════════════════════════════
-   WINE SHOP — Interactive Features · script.js
+   WINE SHOP — script.js
 ═══════════════════════════════════════════════════════════ */
 
-/* ── AUTO-SCROLL WINES PANEL (INFINITE CIRCULAR SCROLL) ──── */
-
+/* ── AUTO-SCROLL ── */
 class WinesPanelScroller {
   constructor() {
     this.panel = document.querySelector('.wines-panel');
@@ -12,7 +11,6 @@ class WinesPanelScroller {
     this.lastTime = Date.now();
     this.cardWidth = 0;
     this.originalCardsCount = 0;
-    this.thumbOffset = 0;
 
     if (this.panel) {
       this.setupInfiniteScroll();
@@ -25,22 +23,12 @@ class WinesPanelScroller {
     const cards = Array.from(this.panel.querySelectorAll('.wine-card'));
     this.originalCardsCount = cards.length;
     this.cardWidth = cards[0]?.offsetWidth || 260;
-
-    cards.forEach(card => {
-      const clone = card.cloneNode(true);
-      this.panel.appendChild(clone);
-    });
-
-    cards.forEach(card => {
-      const clone = card.cloneNode(true);
-      this.panel.appendChild(clone);
-    });
+    cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
+    cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
   }
 
   setupScrollbar() {
-    this.scrollbar = document.querySelector('.wines-scrollbar');
     this.thumb = document.getElementById('thumb1');
-
     this.thumbWidth = 140;
     this.thumb1Pos = -this.thumbWidth;
   }
@@ -49,72 +37,259 @@ class WinesPanelScroller {
     this.panel.addEventListener('mouseenter', () => this.pauseScroll());
     this.panel.addEventListener('mouseleave', () => this.resumeScroll());
     this.panel.addEventListener('wheel', () => this.resetScroll());
-
-
-
     this.animate();
   }
 
   updateScrollbar(deltaTime) {
     const trackWidth = this.panel.offsetWidth;
-    const moveAmount = this.scrollSpeed * deltaTime;
-
-    this.thumb1Pos += moveAmount;
-
-    // Simple looping: reset when thumb leaves screen
-    if (this.thumb1Pos > trackWidth + this.thumbWidth) {
-      this.thumb1Pos = -this.thumbWidth;
-    }
-
+    this.thumb1Pos += this.scrollSpeed * deltaTime;
+    if (this.thumb1Pos > trackWidth + this.thumbWidth) this.thumb1Pos = -this.thumbWidth;
     this.thumb.style.transform = `translateX(${this.thumb1Pos}px)`;
   }
 
   animate() {
     const now = Date.now();
     const deltaTime = now - this.lastTime;
-
     if (this.isAutoScrolling) {
-      const scrollAmount = this.scrollSpeed * deltaTime;
-      this.panel.scrollLeft += scrollAmount;
-
+      this.panel.scrollLeft += this.scrollSpeed * deltaTime;
       const oneSetWidth = this.cardWidth * this.originalCardsCount;
-      if (this.panel.scrollLeft >= oneSetWidth * 2) {
-        this.panel.scrollLeft = oneSetWidth;
-      }
-
+      if (this.panel.scrollLeft >= oneSetWidth * 2) this.panel.scrollLeft = oneSetWidth;
       this.updateScrollbar(deltaTime);
     }
-
     this.lastTime = now;
     requestAnimationFrame(() => this.animate());
   }
 
-  pauseScroll() {
-    this.isAutoScrolling = false;
+  pauseScroll() { this.isAutoScrolling = false; }
+  resumeScroll() { this.isAutoScrolling = true; this.lastTime = Date.now(); }
+  resetScroll() { this.lastTime = Date.now(); }
+}
+
+/* ── TAB NAVIGATION ── */
+class TabNavigation {
+  constructor(scroller = null) {
+    this.navItems = document.querySelectorAll('.sidebar li');
+    this.panels = {
+      'main': document.getElementById('tab-main'),
+      'wines': document.getElementById('tab-wines'),
+      'faq': document.getElementById('tab-faq'),
+      'contacts': document.getElementById('tab-contacts'),
+      'cart': document.getElementById('tab-cart'),
+    };
+    this.cartBtn = document.getElementById('cart-btn');
+    this.scroller = scroller;
+    this.init();
   }
 
-  resumeScroll() {
-    this.isAutoScrolling = true;
-    this.lastTime = Date.now();
+  init() {
+    this.navItems.forEach(item => {
+      item.addEventListener('click', (e) => this.openTab(e.target.textContent.trim().toLowerCase()));
+    });
+
+    if (this.cartBtn) {
+      this.cartBtn.addEventListener('click', () => this.openTab('cart'));
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const filter = e.target.dataset.filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        document.querySelectorAll('.catalogue-item').forEach(item => {
+          item.classList.toggle('hidden', filter !== 'all' && item.dataset.type !== filter);
+        });
+      });
+    });
   }
 
-  resetScroll() {
-    this.lastTime = Date.now();
+  openTab(key) {
+    if (!this.panels[key]) return;
+
+    this.navItems.forEach(i => {
+      i.classList.toggle('active', i.textContent.trim().toLowerCase() === key);
+    });
+
+    Object.values(this.panels).forEach(p => p && p.classList.remove('active'));
+    this.panels[key].classList.add('active');
+
+    const scrollbar = document.querySelector('.wines-scrollbar');
+    if (scrollbar) scrollbar.style.display = key === 'main' ? 'block' : 'none';
+
+    if (this.scroller) {
+      key === 'main' ? this.scroller.resumeScroll() : this.scroller.pauseScroll();
+    }
+
+    if (window.innerWidth <= 768) {
+      document.querySelector('.page-body').classList.remove('sidebar-open');
+    }
   }
 }
 
-/* ── SIDEBAR TOGGLE FUNCTIONALITY ───────────────────────── */
+/* ── ADD TO SELECTION (wine cards) ── */
+function setupAddToCart() {
+  document.querySelectorAll('.wine-add').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      btn.textContent = '✓ Added';
+      btn.style.background = 'var(--gold)';
+      setTimeout(() => {
+        btn.textContent = 'Add to Selection';
+        btn.style.background = '';
+      }, 1500);
+    });
+  });
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-  const toggle = document.getElementById('sidebar-toggle');
-  const pageBody = document.querySelector('.page-body');
+/* ── CART QUANTITY + REMOVE ── */
+function setupCartControls() {
+  // use event delegation so it works on dynamically added rows too
+  const cartList = document.getElementById('cart-list');
+  if (!cartList) return;
 
-  if (toggle && pageBody) {
-    toggle.addEventListener('click', () => {
-      pageBody.classList.toggle('sidebar-open');
+  cartList.addEventListener('click', (e) => {
+    const row = e.target.closest('.cart-row');
+    if (!row) return;
+
+    // remove button
+    if (e.target.classList.contains('cart-remove')) {
+      row.remove();
+      updateCartTotal();
+      return;
+    }
+
+    // qty buttons
+    if (e.target.classList.contains('cart-qty-btn')) {
+      const qtyEl = row.querySelector('.cart-qty-num');
+      const priceEl = row.querySelector('.cart-row-price');
+      let qty = parseInt(qtyEl.textContent);
+
+      // derive unit price from current price / qty
+      const currentTotal = parseInt(priceEl.textContent.replace(/[₦,]/g, ''));
+      const unitPrice = currentTotal / qty;
+
+      if (e.target.textContent === '+') {
+        qty++;
+      } else if (e.target.textContent === '−' && qty > 1) {
+        qty--;
+      }
+
+      qtyEl.textContent = qty;
+      priceEl.textContent = '₦' + (unitPrice * qty).toLocaleString();
+      updateCartTotal();
+    }
+  });
+}
+
+/* ── CART TOTAL ── */
+function updateCartTotal() {
+  let subtotal = 0;
+  document.querySelectorAll('.cart-row-price').forEach(el => {
+    subtotal += parseInt(el.textContent.replace(/[₦,]/g, ''));
+  });
+
+  const delivery = 5000;
+  const total = subtotal + delivery;
+
+  const vals = document.querySelectorAll('.cart-summary-value');
+  if (vals[0]) vals[0].textContent = '₦' + subtotal.toLocaleString();
+  if (vals[3]) vals[3].textContent = '₦' + total.toLocaleString();
+}
+
+/* ── CHECKOUT ── */
+function setupCheckout() {
+  const proceedBtn = document.querySelector('.cart-checkout-btn');
+  const cartPanel = document.querySelector('.cart-panel');
+  const checkoutPanel = document.getElementById('checkout-panel');
+  const backBtn = document.getElementById('checkout-back');
+  const copyBtn = document.getElementById('copy-acct');
+  const copyConfirm = document.getElementById('copy-confirm');
+  const confirmBtn = document.getElementById('checkout-confirm-btn');
+
+  if (!proceedBtn || !checkoutPanel) return;
+
+  proceedBtn.addEventListener('click', () => {
+    populateCheckoutSummary();
+    cartPanel.style.display = 'none';
+    checkoutPanel.style.display = 'flex';
+    checkoutPanel.style.flexDirection = 'column';
+  });
+
+  backBtn.addEventListener('click', () => {
+    checkoutPanel.style.display = 'none';
+    cartPanel.style.display = 'grid';
+  });
+
+  copyBtn.addEventListener('click', () => {
+    const num = document.getElementById('acct-number').textContent;
+    navigator.clipboard.writeText(num).then(() => {
+      copyBtn.classList.add('copied');
+      copyConfirm.classList.add('show');
+      setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyConfirm.classList.remove('show');
+      }, 2000);
+    });
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    const total = document.getElementById('checkout-total').textContent;
+    const itemCount = document.getElementById('checkout-item-count').textContent;
+    let orderLines = '';
+    document.querySelectorAll('.checkout-order-row').forEach(row => {
+      const name = row.querySelector('.checkout-order-name').textContent;
+      const qty = row.querySelector('.checkout-order-qty').textContent;
+      const price = row.querySelector('.checkout-order-price').textContent;
+      orderLines += `• ${name} ${qty} — ${price}\n`;
     });
 
-    // close when clicking outside sidebar on mobile
+    const msg = encodeURIComponent(
+      `Hello IJ's Wine Shop! 🍷\n\nI have completed my payment.\n\n` +
+      `*Order Summary:*\n${orderLines}\n` +
+      `*Total Paid:* ${total}\n*Items:* ${itemCount}\n\n` +
+      `Please find my proof of payment attached. Kindly confirm and process my delivery.\n\nThank you!`
+    );
+
+    window.open(`https://wa.me/2348012345678?text=${msg}`, '_blank');
+  });
+}
+
+function populateCheckoutSummary() {
+  const orderList = document.getElementById('checkout-order-list');
+  orderList.innerHTML = '';
+  let subtotal = 0, totalItems = 0;
+
+  document.querySelectorAll('.cart-row').forEach(row => {
+    const name = row.querySelector('.cart-row-name')?.textContent || '';
+    const qty = parseInt(row.querySelector('.cart-qty-num')?.textContent || '1');
+    const priceRaw = row.querySelector('.cart-row-price')?.textContent || '₦0';
+    const price = parseInt(priceRaw.replace(/[₦,]/g, ''));
+
+    subtotal += price;
+    totalItems += qty;
+
+    const div = document.createElement('div');
+    div.className = 'checkout-order-row';
+    div.innerHTML = `
+      <span class="checkout-order-name">${name}</span>
+      <span class="checkout-order-qty">×${qty}</span>
+      <span class="checkout-order-price">${priceRaw}</span>
+    `;
+    orderList.appendChild(div);
+  });
+
+  const total = subtotal + 5000;
+  document.getElementById('checkout-item-count').textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
+  document.getElementById('checkout-subtotal').textContent = '₦' + subtotal.toLocaleString();
+  document.getElementById('checkout-total').textContent = '₦' + total.toLocaleString();
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // sidebar toggle
+  const toggle = document.getElementById('sidebar-toggle');
+  const pageBody = document.querySelector('.page-body');
+  if (toggle && pageBody) {
+    toggle.addEventListener('click', () => pageBody.classList.toggle('sidebar-open'));
     document.addEventListener('click', (e) => {
       if (
         pageBody.classList.contains('sidebar-open') &&
@@ -130,250 +305,5 @@ document.addEventListener('DOMContentLoaded', () => {
   new TabNavigation(scroller);
   setupAddToCart();
   setupCartControls();
+  setupCheckout();
 });
-
-
-/* ── TAB / NAVIGATION FUNCTIONALITY ──────────────────────── */
-
-/* ── TAB / NAVIGATION FUNCTIONALITY ──────────────────────── */
-
-class TabNavigation {
-  constructor(scroller = null) {
-    this.navItems = document.querySelectorAll('.sidebar li');
-
-    // ADDED cart panel
-    this.panels = {
-      'main': document.getElementById('tab-main'),
-      'wines': document.getElementById('tab-wines'),
-      'faq': document.getElementById('tab-faq'),
-      'contacts': document.getElementById('tab-contacts'),
-      'cart': document.getElementById('tab-cart'),
-    };
-
-    this.cartBtn = document.getElementById('cart-btn');
-
-    this.scroller = scroller;
-    this.init();
-  }
-
-  init() {
-    // sidebar nav clicks
-    this.navItems.forEach(item => {
-      item.addEventListener('click', (e) => this.handleTabClick(e));
-    });
-
-    // top-right cart button click
-    if (this.cartBtn) {
-      this.cartBtn.addEventListener('click', () => {
-        this.openTab('cart');
-      });
-    }
-
-    // filter buttons in catalogue
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.handleFilter(e));
-    });
-  }
-
-  handleTabClick(e) {
-    const key = e.target.textContent.trim().toLowerCase();
-    this.openTab(key);
-  }
-
-  // and inside openTab, the mobile close block is already there — just change the condition:
-  // FROM: if (window.innerWidth <= 768)
-  // TO:   if (window.innerWidth <= 768)  ← already correct, no change needed
-
-  openTab(key) {
-    if (!this.panels[key]) return;
-
-    // update sidebar active state
-    this.navItems.forEach(i => {
-      i.classList.remove('active');
-
-      if (i.textContent.trim().toLowerCase() === key) {
-        i.classList.add('active');
-      }
-    });
-
-    // hide all panels
-    Object.values(this.panels).forEach(panel => {
-      if (panel) {
-        panel.classList.remove('active');
-      }
-    });
-
-    // show selected panel
-    this.panels[key].classList.add('active');
-
-    // show scrollbar only on main tab
-    const scrollbar = document.querySelector('.wines-scrollbar');
-
-    if (scrollbar) {
-      scrollbar.style.display = key === 'main' ? 'block' : 'none';
-    }
-
-    // control auto-scroll
-    if (this.scroller) {
-      if (key === 'main') {
-        this.scroller.resumeScroll();
-      } else {
-        this.scroller.pauseScroll();
-      }
-    }
-
-    // close sidebar automatically on mobile/tablet
-    if (window.innerWidth <= 768) {
-      // close sidebar on mobile after navigating
-      document.querySelector('.page-body').classList.remove('sidebar-open');
-    }
-  }
-
-  handleFilter(e) {
-    const filter = e.target.dataset.filter;
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    e.target.classList.add('active');
-
-    document.querySelectorAll('.catalogue-item').forEach(item => {
-      if (
-        filter === 'all' ||
-        item.dataset.type === filter
-      ) {
-        item.classList.remove('hidden');
-      } else {
-        item.classList.add('hidden');
-      }
-    });
-  }
-}
-
-/* ── INITIALIZATION ──────────────────────────────────────── */
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize all features in correct order
-  const scroller = new WinesPanelScroller();
-  new SidebarToggle();
-  new TabNavigation(scroller);
-
-  console.log('🍷 Wine Shop initialized with auto-scroll, sidebar toggle, and tab navigation');
-});
-
-/* ── UTILITY: Add to Selection Click Handler ──────────────── */
-
-function setupAddToCart() {
-  const addButtons = document.querySelectorAll('.wine-add');
-  addButtons.forEach((btn, index) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const wineName = btn.parentElement.querySelector('.wine-name').textContent;
-      console.log('Added to selection:', wineName);
-
-      // Visual feedback
-      btn.style.background = 'linear-gradient(135deg, #e8c976, var(--gold))';
-      btn.textContent = '✓ Added';
-      setTimeout(() => {
-        btn.style.background = 'linear-gradient(135deg, var(--gold), #e8c976)';
-        btn.textContent = 'Add to Selection';
-      }, 1500);
-    });
-  });
-}
-
-/* ── CART QUANTITY CONTROLS ───────────────────────────── */
-
-function setupCartControls() {
-  const cartRows = document.querySelectorAll('.cart-row');
-
-  cartRows.forEach(row => {
-    const minusBtn = row.querySelectorAll('.cart-qty-btn')[0];
-    const plusBtn = row.querySelectorAll('.cart-qty-btn')[1];
-
-    const qtyNum = row.querySelector('.cart-qty-num');
-    const priceEl = row.querySelector('.cart-row-price');
-
-    // Store original bottle price
-    const originalPrice = parseInt(
-      priceEl.textContent.replace(/[₦,]/g, '')
-    ) / parseInt(qtyNum.textContent);
-
-    plusBtn.addEventListener('click', () => {
-      let qty = parseInt(qtyNum.textContent);
-
-      qty++;
-      qtyNum.textContent = qty;
-
-      updateRowPrice(priceEl, originalPrice, qty);
-      updateCartTotal();
-    });
-
-    minusBtn.addEventListener('click', () => {
-      let qty = parseInt(qtyNum.textContent);
-
-      if (qty > 1) {
-        qty--;
-        qtyNum.textContent = qty;
-
-        updateRowPrice(priceEl, originalPrice, qty);
-        updateCartTotal();
-      }
-    });
-  });
-}
-
-/* ── UPDATE SINGLE ROW PRICE ──────────────────────────── */
-
-function updateRowPrice(priceEl, bottlePrice, qty) {
-  const total = bottlePrice * qty;
-
-  priceEl.textContent =
-    '₦' + total.toLocaleString();
-}
-
-/* ── UPDATE CART TOTAL ────────────────────────────────── */
-
-function updateCartTotal() {
-  const rowPrices = document.querySelectorAll('.cart-row-price');
-
-  let subtotal = 0;
-
-  rowPrices.forEach(price => {
-    subtotal += parseInt(
-      price.textContent.replace(/[₦,]/g, '')
-    );
-  });
-
-  const delivery = 5000;
-  const total = subtotal + delivery;
-
-  // update summary
-  const summaryValues = document.querySelectorAll('.cart-summary-value');
-
-  summaryValues[0].textContent =
-    '₦' + subtotal.toLocaleString();
-
-  summaryValues[3].textContent =
-    '₦' + total.toLocaleString();
-}
-
-// Call setup when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const scroller = new WinesPanelScroller();
-
-    new SidebarToggle();
-
-    new TabNavigation(scroller);
-
-    setupAddToCart();
-
-    setupCartControls();
-
-    console.log('🍷 Wine Shop initialized');
-  });
-} else {
-  setupAddToCart();
-}
