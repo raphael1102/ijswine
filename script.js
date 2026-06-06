@@ -285,7 +285,6 @@ function populateCheckoutSummary() {
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // sidebar toggle
   const toggle = document.getElementById('sidebar-toggle');
   const pageBody = document.querySelector('.page-body');
   if (toggle && pageBody) {
@@ -302,8 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const scroller = new WinesPanelScroller();
+  window._wineScroller = scroller; // expose so test.js can update card count
   new TabNavigation(scroller);
-  setupAddToCart();
-  setupCartControls();
   setupCheckout();
 });
