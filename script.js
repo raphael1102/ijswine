@@ -7,7 +7,7 @@ class WinesPanelScroller {
   constructor() {
     this.panel = document.querySelector('.wines-panel');
     this.isAutoScrolling = true;
-    this.scrollSpeed = 0.03;
+    this.scrollSpeed = 0.3;
     this.lastTime = Date.now();
     this.cardWidth = 0;
     this.originalCardsCount = 0;
