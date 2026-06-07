@@ -1,0 +1,8 @@
+// Configuration file for sensitive keys
+// DO NOT commit the actual config.js file to version control
+// Instead, copy this file to config.js and fill in your credentials
+
+export const SUPABASE_CONFIG = {
+    url: 'YOUR_SUPABASE_PROJECT_URL',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY'
+}
