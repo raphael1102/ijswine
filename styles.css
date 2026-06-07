@@ -368,10 +368,9 @@ main {
 }
 
 .hero-title {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
   font-size: clamp(64px, 8vw, 106px);
   font-weight: 700;
-  font-style: italic;
   line-height: 0.88;
   letter-spacing: -0.03em;
   color: var(--ink);
@@ -421,7 +420,7 @@ main {
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 .wines-panel::-webkit-scrollbar {
   display: none;
