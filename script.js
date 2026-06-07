@@ -7,10 +7,11 @@ class WinesPanelScroller {
   constructor() {
     this.panel = document.querySelector('.wines-panel');
     this.isAutoScrolling = true;
-    this.scrollSpeed = 0.3;
+    this.scrollSpeed = 0.05; // pixels per millisecond
     this.lastTime = Date.now();
     this.cardWidth = 0;
     this.originalCardsCount = 0;
+    this.imagesLoaded = false;
 
     if (this.panel) {
       this.setupInfiniteScroll();
@@ -22,9 +23,48 @@ class WinesPanelScroller {
   setupInfiniteScroll() {
     const cards = Array.from(this.panel.querySelectorAll('.wine-card'));
     this.originalCardsCount = cards.length;
-    this.cardWidth = cards[0]?.offsetWidth || 260;
-    cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
-    cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
+
+    if (cards.length > 0) {
+      const firstCard = cards[0];
+      // Get card width (should be 241px: 240 + 1 border)
+      let width = firstCard.offsetWidth;
+      if (width === 0) {
+        const computed = window.getComputedStyle(firstCard);
+        width = parseFloat(computed.width);
+      }
+      this.cardWidth = width || 241;
+
+      // Preload images more aggressively
+      const allImages = Array.from(firstCard.querySelectorAll('img'));
+      if (allImages.length === 0) {
+        this.imagesLoaded = true;
+      } else {
+        let loadedCount = 0;
+        allImages.forEach(img => {
+          if (img.complete) {
+            loadedCount++;
+          } else {
+            img.addEventListener('load', () => {
+              loadedCount++;
+              if (loadedCount === allImages.length) {
+                this.imagesLoaded = true;
+                // Recalculate width after all images load
+                const newWidth = firstCard.offsetWidth;
+                if (newWidth > 100) this.cardWidth = newWidth;
+              }
+            });
+          }
+        });
+        // Mark as loaded if all were already complete
+        if (loadedCount === allImages.length) {
+          this.imagesLoaded = true;
+        }
+      }
+
+      // Clone cards for infinite scroll
+      cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
+      cards.forEach(card => this.panel.appendChild(card.cloneNode(true)));
+    }
   }
 
   setupScrollbar() {
@@ -36,24 +76,61 @@ class WinesPanelScroller {
   init() {
     this.panel.addEventListener('mouseenter', () => this.pauseScroll());
     this.panel.addEventListener('mouseleave', () => this.resumeScroll());
-    this.panel.addEventListener('wheel', () => this.resetScroll());
+    this.panel.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      this.panel.scrollLeft += e.deltaY;
+      this.lastTime = Date.now();
+    });
+    // Handle touch scrolling on mobile
+    let touchStartX = 0;
+    this.panel.addEventListener('touchstart', (e) => {
+      this.pauseScroll();
+      touchStartX = e.touches[0].clientX;
+    });
+    this.panel.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        const touchDelta = touchStartX - e.touches[0].clientX;
+        this.panel.scrollLeft += touchDelta * 0.5;
+        touchStartX = e.touches[0].clientX;
+      }
+    });
+    this.panel.addEventListener('touchend', () => this.resumeScroll());
     this.animate();
   }
 
   updateScrollbar(deltaTime) {
+    if (!this.thumb) return; // Safety check if thumb doesn't exist
     const trackWidth = this.panel.offsetWidth;
-    this.thumb1Pos += this.scrollSpeed * deltaTime;
-    if (this.thumb1Pos > trackWidth + this.thumbWidth) this.thumb1Pos = -this.thumbWidth;
+    const maxScroll = this.panel.scrollWidth - this.panel.clientWidth;
+
+    // Sync thumb position with actual scroll position (not independent movement)
+    if (maxScroll > 0) {
+      const scrollPercent = this.panel.scrollLeft / maxScroll;
+      this.thumb1Pos = scrollPercent * (trackWidth - this.thumbWidth);
+    }
+
     this.thumb.style.transform = `translateX(${this.thumb1Pos}px)`;
   }
 
   animate() {
     const now = Date.now();
     const deltaTime = now - this.lastTime;
-    if (this.isAutoScrolling) {
+
+    // Ensure cardWidth has a value (use fallback if images are still loading)
+    if (this.cardWidth === 0 && this.originalCardsCount > 0) {
+      const firstCard = this.panel.querySelector('.wine-card');
+      if (firstCard) {
+        this.cardWidth = firstCard.offsetWidth || 241;
+      }
+    }
+
+    if (this.isAutoScrolling && this.cardWidth > 0 && this.originalCardsCount > 0) {
       this.panel.scrollLeft += this.scrollSpeed * deltaTime;
       const oneSetWidth = this.cardWidth * this.originalCardsCount;
-      if (this.panel.scrollLeft >= oneSetWidth * 2) this.panel.scrollLeft = oneSetWidth;
+      // Reset to start when we've scrolled past the first set (seamless infinite loop)
+      if (this.panel.scrollLeft >= oneSetWidth) {
+        this.panel.scrollLeft = 0;
+      }
       this.updateScrollbar(deltaTime);
     }
     this.lastTime = now;
