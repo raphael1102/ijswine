@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IJ'S Wine Shop</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=side_navigation"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="light-theme.css" />
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header>
+      <!-- sidebar toggle moved to LEFT -->
+      <div id="sidebar-toggle" class="sidebar-toggle">☰</div>
+
+      <div class="header-line"></div>
+
+      <a class="header-logo" href="#">
+        <div class="logo-icon">🍷</div>
+        <div class="logo-text">
+          <span class="brand">IJ's Wine</span>
+          <span class="sub">Shop</span>
+        </div>
+      </a>
+
+      <div class="header-line"></div>
+      <button id="theme-toggle" title="Switch to light mode">🌙</button>
+      <!-- cart button replaces sidebar toggle position on RIGHT -->
+      <button id="cart-btn" class="cart-btn" aria-label="Open cart">
+        🛒
+        <span class="cart-badge" id="cart-badge">0</span>
+      </button>
+    </header>
+
+    <!-- BODY LAYOUT -->
+    <div class="page-body">
+      <!-- SIDEBAR -->
+      <nav class="sidebar">
+        <ul>
+          <li class="active">Main</li>
+          <li>Wines</li>
+          <li>FAQ</li>
+          <li>Contacts</li>
+          <li>Cart</li>
+        </ul>
+      </nav>
+
+      <!-- MAIN -->
+      <main>
+        <!-- ═══ TAB: MAIN ═══ -->
+        <div class="tab-panel active" id="tab-main">
+          <section class="hero">
+            <div>
+              <h1 class="hero-title">Wine</h1>
+              <p class="hero-subtitle">Quality Selections</p>
+              <p class="hero-date">Since 2022</p>
+              <div class="hero-rule"></div>
+              <p class="hero-desc">
+                Discover and shop premium wines from IJ's Wine Shop. We curate
+                exceptional bottles from renowned vineyards worldwide, offering
+                you quality, authenticity, and convenience — delivered right to
+                your door.
+              </p>
+            </div>
+          </section>
+
+          <div class="wines-panel"></div>
+        </div>
+
+        <!-- ═══ TAB: WINES ═══ -->
+        <div class="tab-panel" id="tab-wines">
+          <div class="catalogue-panel">
+            <div class="catalogue-header">
+              <p class="catalogue-eyebrow">Full Collection</p>
+              <h2 class="catalogue-title">All Wines</h2>
+              <div class="catalogue-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="red">Red</button>
+                <button class="filter-btn" data-filter="white">White</button>
+                <button class="filter-btn" data-filter="rosé">Rosé</button>
+                <button class="filter-btn" data-filter="champagne">
+                  Champagne
+                </button>
+              </div>
+            </div>
+            <div class="catalogue-grid"></div>
+          </div>
+        </div>
+
+        <!-- ═══ TAB: FAQ ═══ -->
+        <div class="tab-panel" id="tab-faq">
+          <div class="content-panel">
+            <div class="content-panel-inner">
+              <p class="content-eyebrow">Got questions?</p>
+              <h2 class="content-title">Ask Us Anything</h2>
+              <div class="content-rule"></div>
+              <p class="content-desc">
+                Whether it's about a specific wine, delivery, or pairing advice
+                — send us your question and we'll get back to you personally.
+              </p>
+              <form class="faq-form" onsubmit="handleFaqSubmit(event)">
+                <div class="form-group">
+                  <label class="form-label">Your Name</label>
+                  <input
+                    class="form-input"
+                    type="text"
+                    placeholder="e.g. Adaeze Okonkwo"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input
+                    class="form-input"
+                    type="email"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Your Question</label>
+                  <textarea
+                    class="form-input form-textarea"
+                    placeholder="What would you like to know?"
+                  ></textarea>
+                </div>
+                <button type="submit" class="form-submit">
+                  Send Question →
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ TAB: CONTACTS ═══ -->
+        <div class="tab-panel" id="tab-contacts">
+          <div class="content-panel">
+            <div class="content-panel-inner">
+              <p class="content-eyebrow">Come find us</p>
+              <h2 class="content-title">Contact</h2>
+              <div class="content-rule"></div>
+              <div class="contact-list">
+                <div class="contact-item">
+                  <span class="contact-label">Address</span>
+                  <span class="contact-value"
+                    >14 Victoria Island Close,<br />Lagos, Nigeria</span
+                  >
+                </div>
+                <div class="contact-divider"></div>
+                <div class="contact-item">
+                  <span class="contact-label">Email</span>
+                  <a
+                    class="contact-value contact-link"
+                    href="mailto:hello@ijswine.com"
+                    >hello@ijswine.com</a
+                  >
+                </div>
+                <div class="contact-divider"></div>
+                <div class="contact-item">
+                  <span class="contact-label">Phone</span>
+                  <a
+                    class="contact-value contact-link"
+                    href="tel:+2348012345678"
+                    >+234 801 234 5678</a
+                  >
+                </div>
+                <div class="contact-divider"></div>
+                <div class="contact-item">
+                  <span class="contact-label">Hours</span>
+                  <span class="contact-value">Mon – Sat · 10am to 8pm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ TAB: CART ═══ -->
+        <div class="tab-panel" id="tab-cart">
+          <div class="cart-panel">
+            <!-- LEFT: cart items list -->
+            <div class="cart-items-col">
+              <div class="cart-col-header">
+                <p class="cart-col-eyebrow">Your Selection</p>
+                <h2 class="cart-col-title">Cart</h2>
+                <span class="cart-col-count" id="cart-count-label"
+                  >0 items</span
+                >
+              </div>
+
+              <!-- placeholder rows — replace with real items via JS -->
+              <div class="cart-list" id="cart-list"></div>
+            </div>
+
+            <!-- RIGHT: order summary -->
+            <div class="cart-summary-col">
+              <h3 class="cart-summary-title">Order Summary</h3>
+
+              <div class="cart-summary-row">
+                <span class="cart-summary-label">Subtotal</span>
+                <span class="cart-summary-value">₦217,000</span>
+              </div>
+              <div class="cart-summary-row">
+                <span class="cart-summary-label">Delivery</span>
+                <span class="cart-summary-value">₦5,000</span>
+              </div>
+              <div class="cart-summary-row">
+                <span class="cart-summary-label">Discount</span>
+                <span class="cart-summary-value">—</span>
+              </div>
+
+              <div class="cart-summary-rule"></div>
+
+              <div class="cart-summary-row">
+                <span class="cart-summary-label">Total</span>
+                <span class="cart-summary-value total">₦222,000</span>
+              </div>
+
+              <div class="cart-summary-rule"></div>
+
+              <div class="cart-promo">
+                <input
+                  class="cart-promo-input"
+                  type="text"
+                  placeholder="Promo code"
+                />
+                <button class="cart-promo-btn">Apply</button>
+              </div>
+
+              <button class="cart-checkout-btn">Proceed to Checkout →</button>
+              <p class="cart-note">Secure checkout · Delivery within Lagos</p>
+            </div>
+          </div>
+          <!-- CHECKOUT PANEL — hidden by default, shown when Proceed is clicked -->
+          <div class="checkout-panel" id="checkout-panel" style="display: none">
+            <div class="checkout-inner">
+              <div class="checkout-header">
+                <button class="checkout-back" id="checkout-back">
+                  ← Back to Cart
+                </button>
+                <p class="checkout-eyebrow">Secure Payment</p>
+                <h2 class="checkout-title">Checkout</h2>
+                <div class="content-rule"></div>
+              </div>
+
+              <div class="checkout-body">
+                <!-- LEFT: Bank details + order summary -->
+                <div class="checkout-left">
+                  <div class="checkout-section">
+                    <p class="checkout-section-label">Pay via Bank Transfer</p>
+
+                    <div class="checkout-bank-card">
+                      <div class="bank-row">
+                        <span class="bank-label">Bank</span>
+                        <span class="bank-value">Guaranty Trust Bank</span>
+                      </div>
+                      <div class="bank-row">
+                        <span class="bank-label">Account Name</span>
+                        <span class="bank-value">IJ's Wine Shop Ltd</span>
+                      </div>
+                      <div class="bank-row">
+                        <span class="bank-label">Account Number</span>
+                        <div class="bank-acct-wrap">
+                          <span
+                            class="bank-value bank-acct-num"
+                            id="acct-number"
+                            >0123456789</span
+                          >
+                          <button
+                            class="bank-copy-btn"
+                            id="copy-acct"
+                            title="Copy account number"
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <rect x="9" y="9" width="13" height="13" rx="2" />
+                              <path
+                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                              />
+                            </svg>
+                          </button>
+                          <span class="bank-copy-confirm" id="copy-confirm"
+                            >Copied!</span
+                          >
+                        </div>
+                      </div>
+                      <div class="bank-row">
+                        <span class="bank-label">Sort Code</span>
+                        <span class="bank-value">058-152-367</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="checkout-section">
+                    <p class="checkout-section-label">Contact for Delivery</p>
+                    <div class="checkout-bank-card">
+                      <div class="bank-row">
+                        <span class="bank-label">Phone</span>
+                        <a
+                          class="bank-value bank-link"
+                          href="tel:+2348012345678"
+                          >+234 801 234 5678</a
+                        >
+                      </div>
+                      <div class="bank-row">
+                        <span class="bank-label">Email</span>
+                        <a
+                          class="bank-value bank-link"
+                          href="mailto:hello@ijswine.com"
+                          >hello@ijswine.com</a
+                        >
+                      </div>
+                      <div class="bank-row">
+                        <span class="bank-label">Address</span>
+                        <span class="bank-value"
+                          >14 Victoria Island Close, Lagos</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- RIGHT: Order summary + confirm -->
+                <div class="checkout-right">
+                  <div class="checkout-section">
+                    <p class="checkout-section-label">Your Order</p>
+
+                    <div class="checkout-order-list" id="checkout-order-list">
+                      <!-- populated by JS from cart rows -->
+                    </div>
+
+                    <div class="checkout-totals">
+                      <div class="checkout-total-row">
+                        <span class="checkout-total-label">Items</span>
+                        <span
+                          class="checkout-total-value"
+                          id="checkout-item-count"
+                          >—</span
+                        >
+                      </div>
+                      <div class="checkout-total-row">
+                        <span class="checkout-total-label">Subtotal</span>
+                        <span
+                          class="checkout-total-value"
+                          id="checkout-subtotal"
+                          >—</span
+                        >
+                      </div>
+                      <div class="checkout-total-row">
+                        <span class="checkout-total-label">Delivery</span>
+                        <span class="checkout-total-value">₦5,000</span>
+                      </div>
+                      <div class="checkout-total-row checkout-total-final">
+                        <span class="checkout-total-label">Total Due</span>
+                        <span
+                          class="checkout-total-value gold"
+                          id="checkout-total"
+                          >—</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="checkout-section">
+                    <p class="checkout-section-label">After Payment</p>
+                    <p class="checkout-note-text">
+                      Transfer the exact amount above to the account details
+                      provided. Then tap the button below — it will open
+                      WhatsApp so you can send us your proof of payment and
+                      delivery address.
+                    </p>
+                    <button
+                      class="checkout-confirm-btn"
+                      id="checkout-confirm-btn"
+                    >
+                      ✓ I've Completed My Payment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wines-scrollbar">
+          <div class="wines-scrollbar-thumb" id="thumb1"></div>
+          <div class="wines-scrollbar-thumb" id="thumb2"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-left">
+        <a class="social-icon" href="#" aria-label="YouTube">▶</a>
+        <a class="social-icon" href="#" aria-label="Twitter">𝕏</a>
+        <a class="social-icon" href="#" aria-label="Instagram">◎</a>
+      </div>
+      <div class="footer-right">
+        <span class="partner-name">goodwine</span>
+        <span class="footer-sep"></span>
+        <span class="partner-name">wine wine</span>
+        <span class="footer-sep"></span>
+        <span class="partner-name">vineyard</span>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script type="module" src="test.js"></script>
+    <script type="module" src="config.js"></script>
+    <script src="light-theme.js"></script>
+  </body>
+</html>
